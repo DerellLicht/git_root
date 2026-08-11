@@ -1,0 +1,18 @@
+llvm            clang version 22.1.7                C++17
+   32-bit       D:\llvm/bin/i686-w64-mingw32-clang++.exe
+   64-bit       D:\llvm/bin/x86_64-w64-mingw32-clang++.exe
+
+cygwin          i686-w64-mingw32-g++ (GCC) 12.4.0   C++17
+   32-bit       C:\cygwin64/bin/i686-w64-mingw32-g++.exe
+   64-bit       C:\cygwin64/bin/x86_64-w64-mingw32-g++.exe
+
+tdm32           g++ (tdm-1) 10.3.0                  C++14
+                d:\tdm32\bin\g++
+
+#  NOTE: TDM64 is deprecated, and especially should not be used for UNICODE projects.
+#  _stprintf(), aka wsprintf(), are not working properly at all,
+#  in TDM64 V10.3.0 with UNICODE enabled
+tdm64           g++ (tdm64-1) 10.3.0                C++14
+                d:\tdm64\bin\g++
+
+

@@ -1,0 +1,23 @@
+
+# warning: dereferencing type-punned pointer will break strict-aliasing rules
+CFLAGS += -fno-strict-aliasing
+
+#  turn off "deprecated conversion from string constant"
+CFLAGS += -Wno-write-strings
+
+#  turn off "ignoring return value of function"
+CPP_FLAGS += -U_FORTIFY_SOURCE
+
+#  turn off "warning: format not a string literal and no format arguments"
+CPP_FLAGS += -Wno-format-security
+
+#  turn off "warning: `%y' yields only last 2 digits of year"
+CPP_FLAGS += -Wno-format-y2k
+
+#  turn off "output may be truncated copying 129 bytes from a string of length 259 
+CPP_FLAGS += -Wno-stringop-truncation
+
+# FIX "This app has failed to start because libgcc_s_dw2-1.dll was not found."
+# On modern MinGW builds
+CFLAGS += -static-libgcc -static-libstdc++
+

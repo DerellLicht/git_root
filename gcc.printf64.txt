@@ -1,0 +1,30 @@
+http://stackoverflow.com/questions/2844/how-do-you-printf-an-unsigned-long-long-intthe-format-specifier-for-unsigned-lo
+
+Nathan Fellman
+answered Aug 12 '08 at 11:07
+edited Sep 4 '10 at 19:58
+
+You may want to try using the inttypes.h library that gives you types 
+such as int32_t, int64_t, uint64_t etc. 
+You can then use its macros such as:
+
+uint64_t x;
+uint32_t y;
+
+printf("x: %"PRId64", y: %"PRId32"\n", x, y);
+
+This is "guaranteed" to not give you the same trouble as long, 
+unsigned long long etc, since you don't have to guess how many bits 
+are in each data type.
+        
+        
+where these PRId64, PRId32 macros defined? 
+– happy_marmoset Dec 12 '13 at 12:31
+3        
+        
+@happy_marmoset: they are defined in inttypes.h 
+– Nathan Fellman Dec 12 '13 at 14:49
+         
+I think you need PRIu64 and PRIu32 for unsigned integers. 
+– Lasse Kliemann Jun 3 '16 at 15:08  
+

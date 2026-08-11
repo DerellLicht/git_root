@@ -1,0 +1,5 @@
+unusedFunction
+missingIncludeSystem
+cstyleCast
+dangerousTypeCast
+unusedStructMember

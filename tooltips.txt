@@ -1,0 +1,10 @@
+d:\SourceCode\Git Yes, Master?? > u tooltips
+ULOCATE.EXE, Version 1.18
+output format = 0x0010, size_len=6
+searching d:\SourceCode\Git
+d:\SourceCode\Git/DerBar/tooltips.cpp
+d:\SourceCode\Git/DerBar/tooltips.h
+d:\SourceCode\Git/LedScroll/tooltips.cpp
+d:\SourceCode\Git/wbigcalc/tooltips.cpp
+d:\SourceCode\Git/wbigcalc/tooltips.h
+d:\SourceCode\Git/wFontShow/tooltips.cpp

@@ -1,0 +1,22 @@
+Andrew Haley (gnu.gcc.help)
+9:17 AM (51 minutes ago)
+
+Dan Miller <dan.mil...@gmail.com> wrote:
+> Okay, here's a buildable extraction of the relevant code:
+
+I think this is a bug in one version of gcc.  
+gcc 4.4 warned incorrectly about aliasing.
+
+In any case, your program doesn't have a bug.  Aliasing any data type
+with a character array is explicitly allowed by the standard.
+
+ $ ~/gcc/gcc-4_3-branch/install/bin/g++ t.cc -Wall -O2
+ $ ~/gcc/gcc-4_4-branch/install/bin/g++ t.cc -Wall -O2
+t.cc: In function 'int main()':
+t.cc:81: warning: dereferencing pointer 'gmsg' does break strict-aliasing rules
+t.cc:70: note: initialized from here
+ $ ~/gcc/gcc-4_5-branch/install/bin/g++ t.cc -Wall -O2
+ $ ~/gcc/gcc-4_6-branch/install/bin/g++ t.cc -Wall -O2
+
+Andrew.
+

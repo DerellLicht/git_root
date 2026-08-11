@@ -1,0 +1,223 @@
+rem for %v in (binclock_redux, cdtimer, derbar, fidelity_calcs, FranklinFW_data, images_gdip, LedScroll, media_list, ndir32, plus42_image_mgr, qualify, read_tree, terminal, uni_file_mgr, wbigcalc, wdparse, wFontList, winagrams, winwiz, wmetar) do call :update_der_libs %v
+for %v in (binclock_redux, cdtimer, derbar, fidelity_calcs, FranklinFW_data, images_gdip, LedScroll, media_list, ndir32, plus42_image_mgr, qualify, read_tree, terminal, uni_file_mgr, wbigcalc, wdparse, wFontList, winagrams, winwiz, wmetar) do call :update_der_libs %v
+setlocal
+cd binclock_redux\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd cdtimer\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd derbar\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd fidelity_calcs\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd FranklinFW_data\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd images_gdip\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd LedScroll\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd media_list\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd ndir32\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd plus42_image_mgr\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd qualify\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd read_tree\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd terminal\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd uni_file_mgr\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd wbigcalc\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd wdparse\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd wFontList\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd winagrams\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd winwiz\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+setlocal
+cd wmetar\der_libs
+git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+cd ..
+cd..
+_
+endlocal
+goto :eof

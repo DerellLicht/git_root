@@ -1,0 +1,4 @@
+1. make sure all file paths contain forward slashes, not backslashes.
+2. compiledb make -B
+You should see the entire application building successfully.
+
