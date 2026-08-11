@@ -425,6 +425,27 @@ def ensure_default_suppressions(path: Path) -> None:
     print()
 
 
+def ensure_cppcheck_suppress_file(path: Path) -> None:
+    """cppcheck, unlike ClaudeLint's own --suppressions handling above,
+    aborts outright via --suppressions-list if the named file doesn't
+    exist -- it won't just treat "missing" as "no suppressions" the way
+    load_suppressions()/ensure_default_suppressions() do. Since `make
+    clint` (this script) always runs before `make cppc` in the real
+    workflow, scaffold the file here so cppcheck never gets the chance
+    to fail on a fresh checkout. Left genuinely empty rather than
+    seeded with format-note comments the way ensure_default_suppressions
+    is: those comments document ClaudeLint's OWN suppression syntax,
+    which this script owns and generates; this file's syntax belongs to
+    cppcheck, not to ClaudeLint, so there's nothing of this script's own
+    to explain in it."""
+    if path.exists():
+        return
+    path.touch()
+    print(f"(no {path.name} found -- created an empty one; cppcheck "
+          f"requires the file to exist even with nothing suppressed yet)")
+    print()
+
+
 def write_suppressions(path: Path, unused: list[dict], project_dir: Path) -> None:
     """--generate-suppressions: dump the CURRENT unused list as a ready-
     to-use suppression file -- the "yes, I know, leave it" baseline
@@ -704,6 +725,15 @@ def main() -> None:
                      help="path to the suppression file (path:line per "
                           "entry), relative to the project dir unless "
                           "absolute. Missing file = no suppressions.")
+    ap.add_argument("--cppcheck-suppressions", default=".suppress.cppcheck",
+                     metavar="NAME",
+                     help="filename (relative to the project dir) that "
+                          "cppcheck's own --suppressions-list expects to "
+                          "find. cppcheck aborts if it's missing entirely, "
+                          "so ClaudeLint creates an empty one on startup "
+                          "if it doesn't already exist -- this only "
+                          "controls the name checked/created; the content "
+                          "and format are entirely cppcheck's own.")
     ap.add_argument("--generate-suppressions", metavar="PATH",
                      help="instead of reporting, write the CURRENT unused "
                           "list to PATH in suppression-file format and "
@@ -760,6 +790,9 @@ def main() -> None:
     if not suppressions_path.is_absolute():
         suppressions_path = project_dir / suppressions_path
     ensure_default_suppressions(suppressions_path)
+
+    cppcheck_suppress_path = project_dir / args.cppcheck_suppressions
+    ensure_cppcheck_suppress_file(cppcheck_suppress_path)
 
     if not args.skip_stale_check:
         stale_problems = check_compile_commands_stale(entries, project_dir, args.make_cmd)
