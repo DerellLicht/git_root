@@ -1,0 +1,17 @@
+WM_COMMAND: cmd: 3, target: 319	
+WM_COMMAND: cmd: 7, target: 319	
+WM_COMMAND: cmd: 9, target: 319	
+WM_COMMAND: cmd: 8, target: 319	
+WM_COMMAND: cmd: 1, target: 319	
+
+Claude comments:
+
+So your captured sequence is exactly the normal click-to-select flow:
+
+3 CBN_SETFOCUS — combo got focus (mouse click on it)
+7 CBN_DROPDOWN — list opened
+9 CBN_SELENDOK — user clicked an item, selection is being committed
+8 CBN_CLOSEUP — dropdown list closes
+1 CBN_SELCHANGE — current selection officially updated
+
+The one you want is CBN_SELCHANGE (1). By the time you receive it, CB_GETCURSEL is guaranteed to return the newly-selected index — that's the whole contract of the notification. Don't try to read the selection at CBN_SELENDOK (9); although it fires first and is tempting since it implies "ended with OK," the internal selection state isn't guaranteed committed yet in all cases (e.g. it also fires on some cancel-ish paths depending on Windows version quirks), and CBN_SELCHANGE is the documented, standard signal for "selection has changed, go read it now."
