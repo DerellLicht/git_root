@@ -1,3 +1,4 @@
 # Ignore all subirectories (but not files in the repo root dir):
 */
 tool_select.fix.txt
+*.bak
