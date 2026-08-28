@@ -1,0 +1,41 @@
+usage: revlog2md.py [-h] [-o OUTPUT] [--format {auto,cpp,text}]
+                    [--comment-prefix COMMENT_PREFIX]
+                    [--version-regex VERSION_REGEX] [--date-regex DATE_REGEX]
+                    [--date-informats DATE_INFORMATS] [--title TITLE]
+                    input
+
+Reverse an ascending-order revision-history block into a CHANGELOG.md-
+compatible file, preserving multi-line entries.
+
+Example: python ..\revlog2md.py version.h --title "wbigcalc Changelog"
+
+positional arguments:
+  input                 path to the input file
+
+options:
+  -h, --help            show this help message and exit
+  -o, --output OUTPUT   output .md path (default: cltemp.md) -- a scratch file
+                        meant to be copy-pasted into your hand-maintained
+                        CHANGELOG.md, not written to it directly
+  --format {auto,cpp,text}
+                        input line style: 'auto' (default) picks 'cpp' for
+                        ['.c', '.cpp', '.cxx', '.h', '.hpp'] files and 'text'
+                        otherwise. 'cpp' = comment-prefixed lines only, 'text'
+                        = every line is a candidate, nothing stripped
+  --comment-prefix COMMENT_PREFIX
+                        override the comment marker to strip/require (default:
+                        '//' for cpp-style input, '' for text)
+  --version-regex VERSION_REGEX
+                        regex matching a version token, incl. optional V/v
+                        prefix (default: '[Vv]?\\d+(?:\\.\\d+)+')
+  --date-regex DATE_REGEX
+                        regex matching a date token; checked per-entry right
+                        after the version to decide if a date is present at
+                        all (default: MM/DD/YY[YY],
+                        '\\d{1,2}/\\d{1,2}/(?:\\d{4}|\\d{2})')
+  --date-informats DATE_INFORMATS
+                        comma-separated strptime formats to try, in order,
+                        when normalizing dates to YYYY-MM-DD (default: a
+                        built-in common set)
+  --title TITLE         H1 title for the generated Markdown (default:
+                        'Changelog')
