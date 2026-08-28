@@ -120,10 +120,24 @@ class Entry:
         self.date = date
         self.messages = []  # list[str]
 
-    def add(self, message):
-        message = BULLET_RE.sub("", message).strip()
-        if message:
-            self.messages.append(message)
+    def add(self, content):
+        content = content.strip()
+        if not content:
+            return
+
+        # A leading "-" always starts a new bullet. No leading "-" means
+        # this line is a word-wrapped continuation of the previous bullet
+        # (unless there is no previous bullet yet, e.g. an entry whose
+        # very first line has no dash at all).
+        has_bullet = bool(BULLET_RE.match(content))
+        text = BULLET_RE.sub("", content).strip()
+        if not text:
+            return
+
+        if has_bullet or not self.messages:
+            self.messages.append(text)
+        else:
+            self.messages[-1] = f"{self.messages[-1]} {text}"
 
 
 def build_entry_regex(version_regex):
