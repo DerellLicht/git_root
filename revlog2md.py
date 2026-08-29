@@ -141,14 +141,25 @@ class Entry:
 
 
 def build_entry_regex(version_regex):
-    # Captures the version, then everything after it as one blob; date vs.
-    # message within that blob is decided separately per entry (some
-    # entries have a date, some don't).
-    return re.compile(rf"^(?P<version>{version_regex})\s+(?P<rest>.*\S)\s*$")
+    # Captures the version, then everything after it (if anything) as one
+    # blob; date vs. message within that blob is decided separately per
+    # entry (some entries have a date, some don't). The trailing blob is
+    # optional: a version line may have nothing else on it at all, e.g.
+    #     2.31  08/18/06
+    #       - Fix handling of volume label...
+    # where the date sits alone on the version's line and every message
+    # line follows as its own (bulleted) continuation.
+    return re.compile(rf"^(?P<version>{version_regex})(?:\s+(?P<rest>.*))?\s*$")
 
 
 def build_date_lead_regex(date_regex):
     return re.compile(rf"^(?P<date>{date_regex})\s+(?P<message>.*\S)\s*$")
+
+
+def build_date_only_regex(date_regex):
+    # Matches when the entire (stripped) remainder is just a date with no
+    # message following it on that same line.
+    return re.compile(rf"^(?P<date>{date_regex})\s*$")
 
 
 def normalize_date(raw_date, informats):
@@ -177,7 +188,7 @@ def strip_version_prefix(version):
     return version[1:] if version and version[0] in "Vv" else version
 
 
-def parse_entries(lines, comment_prefix, entry_re, date_lead_re, informats):
+def parse_entries(lines, comment_prefix, entry_re, date_lead_re, date_only_re, informats):
     entries = []
     current = None
     started = False
@@ -207,15 +218,29 @@ def parse_entries(lines, comment_prefix, entry_re, date_lead_re, informats):
                 entries.append(current)
 
             version = strip_version_prefix(m.group("version"))
-            remainder = m.group("rest")
+            remainder = (m.group("rest") or "").strip()
 
-            dm = date_lead_re.match(remainder)
-            if dm:
-                date = normalize_date(dm.group("date"), informats)
-                message = dm.group("message")
-            else:
+            if not remainder:
+                # Bare version line (optionally it turns out to hold only
+                # a date, handled below); message(s) come from the lines
+                # that follow.
                 date = ""
-                message = remainder
+                message = ""
+            else:
+                dm = date_lead_re.match(remainder)
+                if dm:
+                    date = normalize_date(dm.group("date"), informats)
+                    message = dm.group("message")
+                else:
+                    dm_only = date_only_re.match(remainder)
+                    if dm_only:
+                        # The whole remainder was just a date -- no
+                        # message on this line, e.g. "2.31  08/18/06".
+                        date = normalize_date(dm_only.group("date"), informats)
+                        message = ""
+                    else:
+                        date = ""
+                        message = remainder
 
             current = Entry(version=version, date=date)
             current.add(message)
@@ -315,11 +340,14 @@ def main(argv=None):
 
     entry_re = build_entry_regex(args.version_regex)
     date_lead_re = build_date_lead_regex(args.date_regex)
+    date_only_re = build_date_only_regex(args.date_regex)
 
     with open(args.input, "r", encoding="utf-8", errors="replace") as f:
         lines = f.readlines()
 
-    entries = parse_entries(lines, comment_prefix, entry_re, date_lead_re, informats)
+    entries = parse_entries(
+        lines, comment_prefix, entry_re, date_lead_re, date_only_re, informats
+    )
 
     if not entries:
         print("warning: no entries were parsed -- check your options", file=sys.stderr)

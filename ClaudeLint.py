@@ -115,6 +115,24 @@ def defines_and_includes(raw_args: list[str]) -> list[str]:
     return [a for a in raw_args if a.startswith("-D") or a.startswith("-I")]
 
 
+def strip_args(clang_args: list[str], patterns: list[str]) -> list[str]:
+    """Drop any argument matching a --strip-arg glob before it reaches the
+    libclang parsing engine. Exists for flags that are perfectly valid for
+    the REAL build compiler (e.g. a GCC-only -Wno-* recorded in
+    compile_commands.json for a tdm32 build) but that the clang engine
+    doesn't recognize -- unlike a real diagnostic, an unrecognized -W flag
+    is reported by libclang's driver directly to the process's stderr
+    (fprintf-style) rather than through tu.diagnostics, so it can't be
+    caught/counted/suppressed after the fact the way real findings are.
+    The only fix is to not hand the flag to the engine at all. This never
+    touches compile_commands.json -- same "detect, don't rewrite the
+    user's file" posture as everything else here; it only affects what
+    this run of ClaudeLint feeds its own parsing engine."""
+    if not patterns:
+        return clang_args
+    return [a for a in clang_args if not any(fnmatch.fnmatch(a, pat) for pat in patterns)]
+
+
 def find_engine_resource_dir(libclang_path: str) -> str | None:
     install_root = Path(libclang_path).parent.parent
     clang_lib_dir = install_root / "lib" / "clang"
@@ -162,8 +180,11 @@ def query_compiler_target(compiler_exe: str) -> str | None:
 
 def build_parse_args(entry: dict, target: str | None, libclang_path: str | None,
                       isystem_cache: dict | None = None,
-                      target_cache: dict | None = None) -> list[str]:
+                      target_cache: dict | None = None,
+                      strip_patterns: list[str] | None = None,
+                      extra_args: list[str] | None = None) -> list[str]:
     clang_args = clean_args(entry["arguments"], entry["file"])
+    clang_args = strip_args(clang_args, strip_patterns or [])
     compiler_exe = entry["arguments"][0]
 
     # Explicit --target always wins (escape hatch for anything the
@@ -200,7 +221,10 @@ def build_parse_args(entry: dict, target: str | None, libclang_path: str | None,
         if isystem_cache is not None:
             isystem_cache[cache_key] = isystem_dirs
 
-    return [f"-isystem{d}" for d in isystem_dirs] + clang_args
+    result = [f"-isystem{d}" for d in isystem_dirs] + clang_args
+    if extra_args:
+        result = result + list(extra_args)
+    return result
 
 
 # ---------------------------------------------------------------------
@@ -718,6 +742,37 @@ def main() -> None:
                           "symbol harvesting and header inventory entirely, "
                           "relative to the project directory (e.g. der_libs, "
                           "or der_libs/*, or *.legacy.h). Repeatable.")
+    ap.add_argument("--strip-arg", action="append", default=[],
+                     help="glob pattern matching a compiler argument to drop "
+                          "before it's fed to the libclang parsing engine "
+                          "(repeatable). For flags that are valid for the "
+                          "REAL build compiler recorded in "
+                          "compile_commands.json but that the clang engine "
+                          "doesn't understand -- e.g. a GCC-only "
+                          "-Wno-stringop-truncation on a tdm32 project -- "
+                          "and would otherwise print an 'unknown warning "
+                          "option' line straight to stderr for every TU "
+                          "(this happens before tu.diagnostics is even "
+                          "wired up, so it can't be filtered after the "
+                          "fact). Does NOT modify compile_commands.json; "
+                          "only affects what this run hands to libclang. "
+                          "Example: --strip-arg '-Wno-stringop-*'")
+    ap.add_argument("--extra-arg", action="append", default=[],
+                     help="extra compiler argument to ADD when parsing with "
+                          "libclang (repeatable), applied after --strip-arg "
+                          "and after the auto-detected --target/-isystem "
+                          "args -- so it can't be silently dropped or "
+                          "shadowed by either. The mirror image of "
+                          "--strip-arg: for a flag the parsing ENGINE needs "
+                          "that isn't (and shouldn't be) in "
+                          "compile_commands.json -- e.g. "
+                          "-Wno-c++11-narrowing needed only for clang's "
+                          "stricter narrowing checks, when the REAL build "
+                          "compiler is GCC/tdm32 and doesn't need or "
+                          "support it. Does NOT modify "
+                          "compile_commands.json, so unlike hand-editing "
+                          "the JSON directly, it can't trigger a FLAGS "
+                          "DIFFER staleness mismatch against the Makefile.")
     ap.add_argument("--no-header-inventory", action="store_true",
                      help="skip §4.2 (useful if the makedepend-block parser "
                           "doesn't match your Makefile's format)")
@@ -815,6 +870,10 @@ def main() -> None:
     print(f"Parsing {len(entries)} translation unit(s)...")
     if args.exclude:
         print(f"  excluding: {args.exclude}")
+    if args.strip_arg:
+        print(f"  stripping compiler args before parse: {args.strip_arg}")
+    if args.extra_arg:
+        print(f"  adding extra compiler args before parse: {args.extra_arg}")
 
     # Build each entry's parse_args up front, sequentially, in the main
     # process -- this is where the single (now cached) -E -v compiler
@@ -824,7 +883,8 @@ def main() -> None:
     tasks = []
     for entry in entries:
         parse_args = build_parse_args(entry, args.target, args.libclang_path,
-                                       isystem_cache, target_cache)
+                                       isystem_cache, target_cache, args.strip_arg,
+                                       args.extra_arg)
         project_include_dirs |= {a for a in entry["arguments"] if a.startswith("-I")}
         tasks.append({
             "entry": entry,

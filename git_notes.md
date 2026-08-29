@@ -1,22 +1,3 @@
-git clone https://github.com/DerellLicht/ndir32
-
-git clone -b dmiller https://daniel.miller@endogiteng01.strykercorp.com/scm/apol/ccu.git dmillerTest
-git clone -b dmiller  http://daniel.miller@endoscmeng01.endo.strykercorp.com:7990/scm/apol/ccu.git dmillerTest
- 
-https://daniel.miller@endogiteng01.strykercorp.com/scm/apol/ccu.git
-
-git clone git@bitbucket.org:vitalconnect/pluto.git -b develop pluto_dev --recursive
-   
-12/09/2014  What was needed to make this work is:
-1. Cannot use https format, must use git/ssh format (for commands)
-2. needed to install Cygwin openssh
-3. create keys using ssh-keygen
-4. need to register public key with bitbucket
-
-12/12/2014  To get Git working on new machine, I copied the .ssh directory from old machine,
-then extracted in *both* c:\home\dmiller\.ssh and c:\Users\dmiller\.ssh
-
-//************************************************************************
 ## Git commands  
 
 - create new branch, local and remote  
