@@ -7,7 +7,8 @@ usage: revlog2md.py [-h] [-o OUTPUT] [--format {auto,cpp,text}]
 Reverse an ascending-order revision-history block into a CHANGELOG.md-
 compatible file, preserving multi-line entries.
 
-Example: python ..\revlog2md.py version.h --title "wbigcalc Changelog"
+Example: 
+python ..\revlog2md.py version.h --title "wbigcalc Changelog" -o CHANGELOG.md
 
 positional arguments:
   input                 path to the input file
