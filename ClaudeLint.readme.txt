@@ -53,9 +53,12 @@ carries GCC-only flags.
                              (e.g. -Wno-c++11-narrowing) that the REAL
                              build compiler (e.g. GCC/tdm32) doesn't
                              need/support and so shouldn't be added to
-                             the Makefile/JSON. Same "=" rule as
-                             --strip-arg applies for dash-leading
-                             values.
+                             the Makefile/JSON. Also see §6 -- same
+                             mechanism, used with -isystem<dir> to find
+                             a third-party header that's only sitting
+                             in one toolchain's include folder. Same
+                             "=" rule as --strip-arg applies for
+                             dash-leading values.
   --no-header-inventory       Skip §4.2 entirely (only useful if the
                              makedepend-block parser doesn't match your
                              Makefile's format).
@@ -272,7 +275,68 @@ above fits how this project's real build should look) is the targeted,
 minimal fix, same as before.
 
 
-6. libclang ENGINE VERSION MISMATCH (import errors, "file not found"
+6. "'someheader.h' file not found" FOR A THIRD-PARTY / AFTER-MARKET
+   LIBRARY HEADER (e.g. libzplay.h)
+-----------------------------------------------------------------------
+CAUSE: ClaudeLint never uses the parsing engine's or the real build
+compiler's DEFAULT header search behavior -- per the Phase 0 recipe, it
+explicitly queries `<compiler> -E -v -x c++ ...` for that ONE compiler's
+own resolved -isystem dirs and feeds only those to libclang. So the
+question is never "is the header found by *some* compiler on this
+machine" -- it's "is the header found by the SPECIFIC compiler named in
+compile_commands.json's arguments[0] for this entry".
+
+This bites hardest when a third-party header has been manually copied
+into one toolchain's include folder (e.g. `d:\tdm32\include`) to make
+the real `make` build work, but compile_commands.json's entry for that
+file has been hand-edited to point at a DIFFERENT compiler (e.g. the
+llvm/clang++ swap from §4, done so clang-tidy/ClaudeLint resolve flags
+consistently). The header genuinely compiles fine under the real tdm32
+build -- it's sitting right there in tdm32's own include folder -- but
+the clang++ binary ClaudeLint is actually querying has its own,
+completely separate mingw sysroot that knows nothing about tdm32's
+folder at all. Angle brackets vs quotes (`<libzplay.h>` vs
+`"libzplay.h"`) makes no difference here -- that only changes SEARCH
+ORDER (quote-form checks the including file's own directory first),
+not whether the file needs to be found at all. Either form still fails
+the same way if the header isn't in ANY dir the queried compiler
+reports.
+
+FIX -- PREFERRED, when you don't want to duplicate the header into yet
+another toolchain's folder (a real headache every time you roll to a
+new toolchain, and doubly so for headers that only apply to one legacy
+project): point ClaudeLint's parsing engine at the extra folder
+directly with --extra-arg, WITHOUT touching compile_commands.json or
+copying anything:
+
+    python ClaudeLint.py --exclude der_libs --extra-arg=-isystemd:/tdm32/include
+
+Note there's no space and no second "=" between -isystem and the path
+-- that's clang's own flag syntax (-isystem<path>, one token), not an
+argparse quirk; the "=" that --extra-arg itself needs is only between
+--extra-arg and the whole flag value. This is exactly the same
+"engine-only, escape-hatch" use --extra-arg already covers for
+compiler warning flags (§5) -- it's not a new mechanism, just a
+different kind of argument being added at parse time only, so it never
+touches compile_commands.json and never risks the §0/§9 staleness gate.
+
+FIX -- ALTERNATIVE, if a proper shared home for the library already
+exists or is worth creating (e.g. the htmlhelp-style submodule pattern,
+bundling headers/.libs/.dlls together for reuse across projects): add
+that submodule's include dir the same way, or -I it into the Makefile
+so it's a real, tracked part of the build. Skip this for a single
+legacy repo still on tdm32 where standing the submodule up isn't worth
+it -- --extra-arg is the lighter-weight fix and doesn't commit you to
+restructuring anything.
+
+DO NOT copy the header into the llvm/clang toolchain's own include
+folder just to silence this -- that reintroduces the exact
+per-toolchain-copy maintenance burden --extra-arg exists to avoid, and
+it'll need repeating (and re-discovering) the next time either
+toolchain is reinstalled or upgraded.
+
+
+7. libclang ENGINE VERSION MISMATCH (import errors, "file not found"
    for windows.h, or static_assert "requires Clang N or later")
 -----------------------------------------------------------------------
 See ClaudeLint_Readme.md's "A note on pip install libclang" section for
@@ -284,7 +348,7 @@ Don't try to fix a version mismatch by hand-copying headers around --
 install a matched standalone Clang instead.
 
 
-7. compile_commands.json "directory" FIELD MISMATCH
+8. compile_commands.json "directory" FIELD MISMATCH
 ------------------------------------------------------
 "DIRECTORY MISMATCH: compile_commands.json claims directory 'X', but
 the file itself is sitting in 'Y'" -- almost always means the project
@@ -296,7 +360,7 @@ path -- every entry's `directory` and `file`/`arguments` need to agree
 with reality).
 
 
-8. compile_commands.json "STALE" (missing/extra entries, flags differ)
+9. compile_commands.json "STALE" (missing/extra entries, flags differ)
 ---------------------------------------------------------------------
 ClaudeLint runs `make -B -n` and diffs it against compile_commands.json
 before doing anything else, and refuses to proceed on any mismatch
@@ -307,7 +371,7 @@ and just want to move past the gate (e.g. no Makefile-based capture for
 this project).
 
 
-9. FILES ClaudeLint CREATES ON STARTUP (if missing)
+10. FILES ClaudeLint CREATES ON STARTUP (if missing)
 -------------------------------------------------------
   .claudelint-suppress    Empty scaffold with format-note comments.
   .suppress.cppcheck      Empty file, so cppcheck's own
@@ -317,7 +381,7 @@ Neither is ever auto-populated with real entries -- that's what
 --generate-suppressions is for (§2), and it's a manual, deliberate step.
 
 
-10. QUICK DEBUGGING CHECKLIST
+11. QUICK DEBUGGING CHECKLIST
 --------------------------------
   Finding looks wrong (used symbol flagged unused, or vice versa)?
       --> --why 'Struct::field' (or bare name) shows every reference
@@ -336,3 +400,8 @@ Neither is ever auto-populated with real entries -- that's what
           the latter trips the staleness gate on the next run.
           Otherwise the fix belongs in CFLAGS/the source, then
           re-sync compile_commands.json.
+  "'x.h' file not found" for a third-party/after-market library header?
+      --> §6. Almost always the queried compiler for that
+          compile_commands.json entry has its own separate sysroot that
+          doesn't know about the folder you copied the header into.
+          --extra-arg=-isystem<dir> (no space, no copying) is the fix.
