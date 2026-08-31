@@ -26,7 +26,7 @@ use `revlog2md` script to generate `CHANGELOG.md` :
 5. copy-and-paste the `release:` target over  
 
 ---
-##  How to update distribution without rolling version number
+#  How to update distribution without rolling version number
 
 ## Path A: Re-create the Release from Scratch (Cleanest)
 If no one has downloaded your release yet, the cleanest approach is to delete the faulty release and publish the updated zip package.
@@ -51,7 +51,24 @@ Run this command in your console:
 *Why this works:* The `gh release upload` command expects the tag to already exist and cleanly appends the new file to the current release assets page alongside your `$(DIST_ZIP)` and `CHANGELOG.md`.
 
 ---
-##  Dealing with manual Release, not compatible with our new system
+#  Fix archived repo
+
+Recovery for ClearIcon -- good news, your edit is still sitting there uncommitted, 
+so no redo needed, just commit what's already there:
+
+gh repo unarchive DerellLicht/ClearIcon --yes  
+cd D:\SourceCode\Git\ClearIcon  
+git diff readme.md  
+
+(worth a quick look to confirm it's just the notice text prepended, nothing else) then:
+
+git add -A  
+git commit -m "Mark repository as deprecated"  
+git push  
+gh repo archive DerellLicht/ClearIcon --yes  
+
+---
+#  Dealing with manual Release, not compatible with our new system
 
 ## Me  
 
