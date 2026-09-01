@@ -53,19 +53,28 @@ Run this command in your console:
 ---
 #  Fix archived repo
 
-Recovery for ClearIcon -- good news, your edit is still sitting there uncommitted, 
+Recovery for `ClearIcon` -- good news, your edit is still sitting there uncommitted, 
 so no redo needed, just commit what's already there:
 
+```
 gh repo unarchive DerellLicht/ClearIcon --yes  
 cd D:\SourceCode\Git\ClearIcon  
 git diff readme.md  
+```
 
 (worth a quick look to confirm it's just the notice text prepended, nothing else) then:
 
+```
 git add -A  
 git commit -m "Mark repository as deprecated"  
 git push  
 gh repo archive DerellLicht/ClearIcon --yes  
+```
+
+---
+#  How to point to the latest release, without specifying version number
+
+`https://github.com/DerellLicht/derbar/releases/latest`
 
 ---
 #  Dealing with manual Release, not compatible with our new system
