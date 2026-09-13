@@ -77,6 +77,13 @@ gh repo archive DerellLicht/ClearIcon --yes
 `https://github.com/DerellLicht/derbar/releases/latest`
 
 ---
+#  Tagging a commit (without Release)
+```
+git tag -a v1.03 -m "Implement Options dialog, persist file cursor positions"
+git push origin v1.03
+```
+
+---
 #  Dealing with manual Release, not compatible with our new system
 
 ## Me  

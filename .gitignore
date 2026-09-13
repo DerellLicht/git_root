@@ -4,3 +4,5 @@ tool_select.fix.txt
 *.bak
 repos.list.txt
 all-repos-dated.txt
+repo.list.txt
+dotnet.man
