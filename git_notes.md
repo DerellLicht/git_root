@@ -34,7 +34,7 @@ rm -rf .git/modules/<path_to_submodule>
 git init .  
 git add [as required]  
 git commit -m "create repository"  
-git branch -M master
+git branch -M master  
 git remote add origin https://github.com/DerellLicht/derbar  
 git push -u origin master  
 
