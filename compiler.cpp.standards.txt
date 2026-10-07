@@ -1,4 +1,5 @@
 llvm            clang version 22.1.7                C++17
+                clang version 23.1.2                C++17
    32-bit       D:\llvm/bin/i686-w64-mingw32-clang++.exe
    64-bit       D:\llvm/bin/x86_64-w64-mingw32-clang++.exe
 

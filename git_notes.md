@@ -38,6 +38,32 @@ git branch -M master
 git remote add origin https://github.com/DerellLicht/derbar  
 git push -u origin master  
 
+---
+- move an existing Git repo over to GitHub
+
+So the steps, using the real name:
+
+1. Create an empty repo on GitHub
+
+On your repositories page, click New, name it PrettyReMark, and leave README, .gitignore, and license unchecked. The result will be https://github.com/DerellLicht/PrettyReMark.
+
+2. Repoint your local PrettyReMark folder and push
+
+From inside your local PrettyReMark project folder:
+
+git remote -v
+git remote set-url origin https://github.com/DerellLicht/PrettyReMark.git
+git push origin --all
+git push origin --tags
+
+The first command just shows the current remote (the GitLab URL). The set-url command swaps it for the GitHub one, and the two pushes upload all branches, tags, and history.
+
+3. Create a GitHub Release
+
+Git doesn't carry over GitLab's release binaries. Make a release on the new repo (the Releases link on the right side of the repo page, or gh release create) and attach the same installer/zip you had on GitLab.
+ 
+---
+
 - fix detached head  
 git checkout -b master  
 git push --set-upstream origin master  
