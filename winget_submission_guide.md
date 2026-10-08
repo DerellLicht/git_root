@@ -8,6 +8,10 @@ installer is always needed.
 Items marked **(untested)** are things I believe are true but did not
 actually run during the PRM submission.
 
+Flow in one line (Part 1): build and test in the **staging** folder in the
+project repo (1.2 - 1.4), then branch, **copy the folder into `winget-pkgs`**,
+commit, push and open the PR (1.5).
+
 ## Reference: where things live
 
 | What | Path |
@@ -131,6 +135,11 @@ uploaded asset is the one you tested.
 
 ## 1.4 Validate and test
 
+Both commands below run on the **staging** folder in the project repo (built
+in 1.2). `<version folder>` means that staging folder, for example
+`D:\SourceCode\Git\PrettyReMark\winget\d\DerellLicht\PrettyReMark\<ver>`.
+The copy into `winget-pkgs` comes later, in 1.5.
+
 ```
 winget validate --manifest <version folder>
 ```
@@ -140,8 +149,12 @@ prints a notice that the dependency was "not validated" and then
 
 ```
 cd D:\SourceCode\Git.others\winget-pkgs
-.\Tools\SandboxTest.ps1 <version folder>
+.\Tools\SandboxTest.ps1 D:\SourceCode\Git\PrettyReMark\winget\d\DerellLicht\PrettyReMark\<ver>
 ```
+The `cd` is only to reach the script, which lives in the `winget-pkgs` clone.
+The argument is the **staging** folder in the project repo, as an absolute
+path; the manifests do not have to be inside the clone yet.
+
 **Run this from an elevated PowerShell console** (right-click Windows
 PowerShell, Run as administrator), not from TCC. In TCC the `.ps1` just opens
 in Notepad, and from a non-elevated prompt the script wrongly reports
@@ -162,21 +175,41 @@ missing dependencies anyway.
 
 ## 1.5 Branch, copy, commit, push, PR
 
-```
-git checkout -b add-prettyremark-<ver>
-```
-Branch from an up-to-date `master`. If the clone is not brand new, first sync
-the fork on GitHub (**Sync fork**, then **Update branch**), then in the clone:
-`git checkout master` and `git pull`, and only then create the branch.
+This is the one place the manifests move from the project repo (staging) into
+`winget-pkgs`. Order matters: branch first, then copy, so the copied files
+land on the submission branch.
 
-Copy the finished folder into `manifests\d\DerellLicht\PrettyReMark\<ver>\`,
-then:
-```
-git add manifests\d\DerellLicht\PrettyReMark\<ver>\
-git commit -m "New package: DerellLicht.PrettyReMark version <ver>"
-git push origin add-prettyremark-<ver>
-```
-Open the PR with the "Compare & pull request" banner, or
+1. Branch from an up-to-date `master`. If the clone is not brand new, first
+   sync the fork on GitHub (**Sync fork**, then **Update branch**). Then in the
+   clone:
+   ```
+   cd D:\SourceCode\Git.others\winget-pkgs
+   git checkout master
+   git pull
+   git checkout -b add-prettyremark-<ver>
+   ```
+2. **Copy the tested staging folder into the clone.** The destination is the
+   submission folder from the Reference table. Create it first (a first
+   submission has no `PrettyReMark` folder yet), then copy the three `.yaml`
+   files:
+   ```
+   mkdir D:\SourceCode\Git.others\winget-pkgs\manifests\d\DerellLicht\PrettyReMark\<ver>
+   copy D:\SourceCode\Git\PrettyReMark\winget\d\DerellLicht\PrettyReMark\<ver>\*.yaml D:\SourceCode\Git.others\winget-pkgs\manifests\d\DerellLicht\PrettyReMark\<ver>\
+   ```
+   Check that the destination holds exactly three files, and that the staging
+   copy is the one you validated and sandbox-tested in 1.4. Do not edit the
+   copy afterwards; fix staging and copy again.
+3. Commit and push:
+   ```
+   git add manifests\d\DerellLicht\PrettyReMark\<ver>\
+   git commit -m "New package: DerellLicht.PrettyReMark version <ver>"
+   git push -u origin HEAD
+   ```
+   `HEAD` is the branch you are on, so the branch name is never retyped. (A
+   typed `git push origin <name>` once failed with `src refspec ... does not
+   match any` even though `git branch` listed the branch; the push by `HEAD`
+   worked.)
+4. Open the PR with the "Compare & pull request" banner, or
 `gh pr create --repo microsoft/winget-pkgs`. Keep the pre-filled title (from
 the commit message). In the checklist, tick only boxes that are true: the
 validate box is covered by `winget validate` and the `winget install
@@ -314,7 +347,7 @@ first.
 ```
 git add manifests\d\DerellLicht\PrettyReMark\<newver>\
 git commit -m "New version: DerellLicht.PrettyReMark version <newver>"
-git push origin update-prettyremark-<newver>
+git push -u origin HEAD
 ```
 Open the PR with the "Compare & pull request" banner GitHub shows after the
 push, or `gh pr create --repo microsoft/winget-pkgs`.

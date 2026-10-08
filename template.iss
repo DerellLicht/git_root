@@ -4,16 +4,26 @@
 ;
 ; To use: search for "TODO" and fill in each item.
 
-#define MyAppName "TODO_AppName"
+#define MyAppName "WBigCalc"
 #ifndef MyAppVersion
 #define MyAppVersion "1.00"
 #endif
 #define MyAppPublisher "Derell Licht"
-#define MyAppURL "https://derelllicht.42web.io/TODO_page.html"
-#define MyAppExeName "TODO_App.exe"
+; #define MyAppURL "https://derelllicht.42web.io/wbigcalc.html"
+#define MyAppURL "https://derelllicht.42web.io/" + MyAppName + ".html"
+; #define MyAppExeName "wbigcalc.exe"
+#define MyAppExeName MyAppName + ".exe"
+; TODO: GitHub project page. Start Menu "Readme" and "Release notes" open
+; README.md and CHANGELOG.md in it. (Hardcode the repo name per project.)
+#define MyRepoURL "https://github.com/DerellLicht/wbigcalc"
+; TODO: the repo's default branch; the Readme/Release notes links point into it.
+; Enable exactly one (older repos use master, newer ones main).
+#define MyRepoBranch "main"
+;#define MyRepoBranch "master"
 #define DoubleAmp(Value) StringChange(Value, "&", "&&")
 #define EscapeConstArgument(Value) StringChange(StringChange(StringChange(Value, "%", "%25"), ",", "%2c"), "}", "%7d")
-#define RepoRoot "D:\SourceCode\Git\TODO_repo"
+;#define RepoRoot "D:\SourceCode\Git\wbigcalc"
+#define RepoRoot "D:\SourceCode\Git\" + MyAppName
 
 ; Uncomment to offer a file association (task, registry entries, shell notify).
 ; Also set AssocExt / AssocProgId / AssocDesc below.
@@ -23,9 +33,11 @@
 #define AssocDesc MyAppName + " Document"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
-; TODO: generate a NEW GUID for each app (Inno IDE: Tools | Generate GUID). Keep the leading "{{".
-AppId={{TODO-REPLACE-WITH-NEW-GUID}
+; NOTE: The value of AppId uniquely identifies this application.
+;       Do not use the same AppId value in installers for other applications.
+; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
+; python -c "import uuid; print('{{' + str(uuid.uuid4()).upper() + '}')"
+AppId={{9D5652ED-924D-4908-A10D-0D29CDABB246}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={cm:NameAndVersion,{#EscapeConstArgument(MyAppName)},{#EscapeConstArgument(MyAppVersion)}}
@@ -48,7 +60,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableDirPage=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run on anything but x64 and Windows 11 on Arm.
-; TODO: remove both Architectures lines if this app also needs to run on 32-bit Windows.
+; remove both Architectures lines if this app also needs to run on 32-bit Windows.
 ArchitecturesAllowed=x64compatible
 ; "ArchitecturesInstallIn64BitMode=x64compatible" requests that the install be done in "64-bit mode" on x64 or Windows 11 on Arm.
 ; This means it should use the native 64-bit Program Files directory and the 64-bit view of the registry.
@@ -56,7 +68,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; Uncomment the following line to use a 64-bit installer.
 ;SetupArchitecture=x64
 DefaultGroupName={#MyAppName}
-; TODO: point at the real license file (or comment out to skip the license page).
+; point at the real license file (or comment out to skip the license page).
 LicenseFile={#RepoRoot}\LICENSE.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 PrivilegesRequired=lowest
@@ -78,21 +90,48 @@ Name: "associateext"; Description: "Associate .{#AssocExt} files with {#MyAppNam
 #endif
 
 [Files]
-; TODO: list the files to install. Paths below are examples only.
+; list the files to install. Paths below are examples only.
 Source: "{#RepoRoot}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "{#RepoRoot}\TODO_App.chm"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "{#RepoRoot}\README.md"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "{#RepoRoot}\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\{#MyAppName}.chm"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\{#MyAppName}.ini"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}\bigcalc.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files.
 
 [Icons]
+; START MENU ORDER: Inno has no setting for it, and the order of lines in this
+; section does not matter. Each entry is a .lnk file, and Windows displays the
+; group sorted alphabetically by name. To control the order, choose the names
+; so they sort the way you want: every name below starts with "{#MyAppName}"
+; and differs after it, giving this order:
+;   wbigcalc, Help, License, Readme, Release notes, Uninstall
+; (The old names -- Readme, ChangeLog, License, "Uninstall wbigcalc", then
+; wbigcalc and wbigcalc Help -- sorted with the exe and help file last.)
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-; TODO: add Start Menu entries for the other installed files (match the [Files] list above).
-;Name: "{group}\{#MyAppName} Help"; Filename: "{app}\TODO_App.chm"
-;Name: "{group}\Readme"; Filename: "{app}\README.md"
-;Name: "{group}\License"; Filename: "{app}\LICENSE.txt"
+; add Start Menu entries for the other installed files (match the [Files] list above).
+Name: "{group}\{#MyAppName} Help"; Filename: "{app}\{#MyAppName}.chm"
+Name: "{group}\{#MyAppName} License"; Filename: "{app}\LICENSE.txt"
+; Readme / Release notes open GitHub pages (via the .url files created in [INI]
+; below), because most machines have no reader for .md files. README.md and
+; CHANGELOG.md are still installed in {app} for anyone who wants them.
+Name: "{group}\{#MyAppName} Readme"; Filename: "{app}\Readme.url"
+Name: "{group}\{#MyAppName} Release notes"; Filename: "{app}\ReleaseNotes.url"
+Name: "{group}\{#MyAppName} Uninstall"; Filename: "{uninstallexe}"
+
+[INI]
+; An "InternetShortcut" .url file is just an INI file, so [INI] can create it.
+; Readme and Release notes open README.md / CHANGELOG.md on their own GitHub
+; file pages (rendered by GitHub), skipping the repo's file listing.
+; The branch comes from MyRepoBranch at the top of this file.
+Filename: "{app}\Readme.url"; Section: "InternetShortcut"; Key: "URL"; String: "{#MyRepoURL}/blob/{#MyRepoBranch}/README.md"
+Filename: "{app}\ReleaseNotes.url"; Section: "InternetShortcut"; Key: "URL"; String: "{#MyRepoURL}/blob/{#MyRepoBranch}/CHANGELOG.md"
+
+[UninstallDelete]
+; Files made by [INI] are not tracked by the uninstaller.
+Type: files; Name: "{app}\*.url"
 
 [Run]
 ; This runs the INSTALLED app (post-install "Launch program now" checkbox) --
