@@ -37,7 +37,7 @@
 ;       Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 ; python -c "import uuid; print('{{' + str(uuid.uuid4()).upper() + '}')"
-AppId={{9D5652ED-924D-4908-A10D-0D29CDABB246}
+AppId={{HEXXCODE-924D-4908-A10D-0D29CDABB246}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={cm:NameAndVersion,{#EscapeConstArgument(MyAppName)},{#EscapeConstArgument(MyAppVersion)}}
