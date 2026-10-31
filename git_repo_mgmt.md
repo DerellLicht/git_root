@@ -1,3 +1,39 @@
+# Release procedure (CubicAdventurer)
+
+Before step 1: add a `## [x.yy] - YYYY-MM-DD` section to `CHANGELOG.md`.
+The newest such header is the only place the version lives.
+
+1. `make sync-version`
+   Copies the changelog version into `Source/CubicAdventurer.dproj`
+   (both `VerInfo_Keys` lines, plus MajorVer and MinorVer).
+2. Rebuild in the Delphi IDE (File > Close All, `git pull`, Shift-F9).
+   Delphi Community Edition has no command-line compiler, so the exe
+   cannot be built from make.
+3. `make check`
+   Verifies that both the .dproj and `CubicAdventurer.exe` carry the
+   changelog version. Aborts with REBUILD REQUIRED if the exe is stale.
+4. Commit and push everything (including the .dproj change from step 1),
+
+5. `make release`  
+   NOTE: It refuses to run on a dirty tree (`check-clean`). It then builds the
+   zipped installer (`dist`, which re-runs `check`, stops the running app
+   and cleans `installer/output`), writes the release notes from the
+   changelog, tags `ca-<version>`, pushes the tag, and creates the GitHub
+   release with the zip attached. Needs the `gh` CLI signed in.
+
+### Afterwards
+- `make update`: refresh the notes and zip of an existing release.  
+- `make retag`: move the tag to HEAD (solo repo only).  
+  `make re-release` = retag + update.  
+- `make sha256`: SHA-256 of the zip, for download-site submissions.
+
+### Local testing, not part of a release
+- `make installer` then `make install` (or `make do_inst`, which does both).
+
+Step 4 hides a dependency: sync-version changes the .dproj, so it has to be committed before make release. Otherwise check-clean stops you. The tag push is also why you run make release yourself, since my sessions can’t push tags.
+
+---
+
 #  How to handle `git pull` when I have pending commit(s)
 
 ## You
