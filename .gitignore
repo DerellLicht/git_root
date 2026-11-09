@@ -1,5 +1,7 @@
 # Ignore all subirectories (but not files in the repo root dir):
 */
+# ...except the docs folder:
+!docs/
 tool_select.fix.txt
 *.bak
 repos.list.txt
