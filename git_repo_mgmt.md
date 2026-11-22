@@ -34,6 +34,36 @@ Step 4 hides a dependency: sync-version changes the .dproj, so it has to be comm
 
 ---
 
+# Merge a feature branch into main (example: status-window-stays-open)
+
+## 1. Make sure everything on the branch is committed
+git checkout status-window-stays-open  
+git status                      # should say "nothing to commit"
+
+## 2. Switch to main and bring it up to date
+git checkout main  
+git pull origin main
+
+## 3. Merge the branch in
+git merge status-window-stays-open
+
+## 4. Push main to GitHub
+git push origin main
+
+## 5. Clean up (optional)
+git branch -d status-window-stays-open               # delete local branch  
+git push origin --delete status-window-stays-open    # delete remote branch
+
+## NOTES
+- Fast-forward: if main hasn’t changed since the branch was created, step 3 is a “fast-forward”. It just moves main up to the branch’s latest commit, with no extra merge commit. That’s the expected result for your fork.
+- Merge commit: if you want a merge commit anyway, use git merge --no-ff status-window-stays-open.
+- Conflicts: if step 3 reports conflicts, fix the marked files, then run git add <files> and git commit. To back out, run git merge --abort.
+- Pull request alternative: on GitHub, open the branch’s pull request and click “Merge pull request”. Then run git checkout main and git pull locally to sync.
+- -d vs -D: git branch -d refuses to delete a branch that isn’t fully merged, so it protects you from deleting unmerged work. Use -D only when you really mean to discard it.
+
+
+---
+
 #  How to handle `git pull` when I have pending commit(s)
 
 ## You
